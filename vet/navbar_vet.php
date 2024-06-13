@@ -1,3 +1,5 @@
+<!-- Utilisation de la navbar classique bootstrap 5 -->
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light" style="background: linear-gradient(to right, #ffffff, #ccedb6);">
     <a class="navbar-brand" href="../index.php">Zoo Arcadia</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
