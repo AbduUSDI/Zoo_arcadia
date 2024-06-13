@@ -1,34 +1,53 @@
 <?php
 session_start();
+require '../functions.php';
+
 if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 3) {
     header('Location: ../login.php');
     exit;
 }
 
-require '../functions.php';
-$conn = dbConnect();
+// Connexion à la base de données
+
+$db = new Database();
+$conn = $db->connect();
+
+// Récupération des informations du formulaire de rapport vétérinaire
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $animal_id = $_POST['animal_id'];
-    $vet_id = $_SESSION['user']['id']; // Assurez-vous que l'ID du vétérinaire est inclus
-    $health_status = $_POST['health_status'];
-    $food_given = $_POST['food_given'];
-    $food_quantity = $_POST['food_quantity'];
-    $visit_date = $_POST['visit_date'];
-    $details = $_POST['details'];
 
-    $stmt = $conn->prepare("INSERT INTO vet_reports (animal_id, vet_id, health_status, food_given, food_quantity, visit_date, details) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$animal_id, $vet_id, $health_status, $food_given, $food_quantity, $visit_date, $details]);
+    // Récupération par label (for) de chaque données
+
+    $animal_id = filter_input(INPUT_POST, 'animal_id', FILTER_VALIDATE_INT);
+    $vet_id = $_SESSION['user']['id'];
+    $health_status = htmlspecialchars($_POST['health_status']);
+    $food_given = htmlspecialchars($_POST['food_given']);
+    $food_quantity = filter_input(INPUT_POST, 'food_quantity', FILTER_VALIDATE_INT);
+    $visit_date = htmlspecialchars($_POST['visit_date']);
+    $details = htmlspecialchars($_POST['details']);
+
+    // Utilisation d'une instance Animal ici dans le if pour qu'elle soit utilisé seulement en cas d'action du formulaire (POST)
+
+    $animal = new Animal($conn);
+
+    // Méthode ajouterRapports pour faire le lien avec la BDD et récupérer les infos grâce au traitement des données plus haut et redirection vers la page Gérer rapports
+
+    $animal->ajouterRapports($animal_id, $vet_id, $health_status, $food_given, $food_quantity, $visit_date, $details);
 
     header('Location: manage_animal_reports.php');
     exit;
 }
 
-$animals = $conn->query("SELECT * FROM animals")->fetchAll(PDO::FETCH_ASSOC);
+// Utilisation de l'instance Animal une seconde fois pour pouvoir utiliser la méthode getAll qui affichera dans le label Animal les animaux disponible à la sélection
+
+$animal = new Animal($conn); 
+$animals = $animal->getAll();
 
 include '../templates/header.php';
 include 'navbar_vet.php';
 ?>
+
+<!-- Conteneur du formulaire POST pour ajouter un rapport vétérinaire -->
 
 <div class="container">
     <h1 class="my-4">Ajouter un Rapport Animal</h1>
@@ -50,7 +69,7 @@ include 'navbar_vet.php';
             <input type="text" class="form-control" id="food_given" name="food_given" required>
         </div>
         <div class="form-group">
-            <label for="food_quantity">Grammage</label>
+            <label for="food_quantity">Grammage (en grammes)</label>
             <input type="number" class="form-control" id="food_quantity" name="food_quantity" required>
         </div>
         <div class="form-group">
@@ -61,8 +80,8 @@ include 'navbar_vet.php';
             <label for="details">Détails (facultatif)</label>
             <textarea class="form-control" id="details" name="details" rows="4"></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Ajouter</button>
+        <button type="submit" class="btn btn-success">Ajouter</button>
     </form>
 </div>
 
-<?php include '../templates/footer.php';
+<?php include '../templates/footer.php'; ?>
