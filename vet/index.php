@@ -9,6 +9,8 @@ include '../templates/header.php';
 include 'navbar_vet.php';
 ?>
 
+<!-- Simple conteneur pour préciser que c'est bien l'espace vétérinaire -->
+
 <div class="container">
     <h1 class="my-4">Espace Vétérinaire</h1>
     <p>Bienvenue dans votre espace personnel. Utilisez le menu pour gérer les rapports des animaux et des habitats.</p>
