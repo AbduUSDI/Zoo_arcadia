@@ -25,11 +25,29 @@
             </li>
             <?php if (isset($_SESSION['user'])): ?>
                 <li class="nav-item">
-                    <a class="nav-link" href="logout.php">Déconnexion</a>
+                    <a class="nav-link" href="admin/logout.php">Déconnexion</a>
                 </li>
             <?php else: ?>
                 <li class="nav-item">
                     <a class="nav-link" href="login.php">Connexion</a>
+                </li>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['user']) && $_SESSION['user']['role_id'] == 1): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="admin/index.php">Mon espace administrateur</a>
+                </li>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['user']) && $_SESSION['user']['role_id'] == 2): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="employee/index.php">Mon espace employé</a>
+                </li>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['user']) && $_SESSION['user']['role_id'] == 3): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="vet/index.php">Mon espace vétérinaire</a>
                 </li>
             <?php endif; ?>
         </ul>
