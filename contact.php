@@ -1,4 +1,5 @@
 <?php
+session_start();
 require 'functions.php';
 
 // Connexion à la base données
