@@ -1,4 +1,7 @@
 <?php
+
+// Vérification de l'identification de l'utiliateur, il doit être role 1 donc admin, sinon page login.php
+
 session_start();
 if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
     header('Location: ../login.php');
@@ -6,25 +9,57 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
 }
 
 require '../functions.php';
-$conn = dbConnect();
+
+// Connexion à la base de données
+
+$db = new Database();
+$conn = $db->connect();
+
+// Instance Habitat pour utiliser les méthodes en rapport avec un habitat
+
+$habitatObj = new Habitat($conn);
+
+// Vérification si un ID d'habitat est fourni dans l'URL, sinon redirige vers manage_habitats.php
+
+if (!isset($_GET['id'])) {
+    header('Location: manage_habitats.php');
+    exit;
+}
+
+// Récupèration de l'ID de l'habitat depuis les paramètres de l'URL
 
 $id = $_GET['id'];
-$habitat = $conn->query("SELECT * FROM habitats WHERE id = $id")->fetch(PDO::FETCH_ASSOC);
+
+// Utilisation de la méthode "getParId" pour récupérer les informations de l'habitat par son id
+
+$habitat = $habitatObj->getParId($id);
+
+// Vérifie si l'habitat existe, sinon redirection vers manage_habitats.php
+
+if (!$habitat) {
+    header('Location: manage_habitats.php');
+    exit;
+}
+
+// Traitement du formulaire (POST) en utilisant les méthode préparées de la classe Habitat
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $description = $_POST['description'];
     $image = $_FILES['image'];
 
-    if ($image['error'] == UPLOAD_ERR_OK) {
-        $imageName = time() . '_' . $image['name'];
-        move_uploaded_file($image['tmp_name'], '../uploads/' . $imageName);
+    if ($image['size'] > 0) {
+
+        // Utilisation de la méthode préparée "uploadImage" pour pouvoir ajouter une image si il le faut sinon garder l'image existante
+
+        $imagee = $habitatObj->uploadImage($image);
     } else {
-        $imageName = $habitat['image'];
+        $image = $habitat['image'];
     }
 
-    $stmt = $conn->prepare("UPDATE habitats SET name = ?, description = ?, image = ? WHERE id = ?");
-    $stmt->execute([$name, $description, $imageName, $id]);
+        // Utilisation de la méthode préparée "updateHabitat" avec ses 4 paramètres
+
+    $habitatObj->updateHabitat($id, $name, $description, $image);
 
     header('Location: manage_habitats.php');
     exit;
@@ -33,6 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include '../templates/header.php';
 include 'navbar_admin.php';
 ?>
+
+<!-- Conteneur pour afficher me formulaire (POST) de modification d'Habitat -->
 
 <div class="container">
     <h1 class="my-4">Modifier un Habitat</h1>
@@ -52,7 +89,7 @@ include 'navbar_admin.php';
                 <img src="../uploads/<?php echo htmlspecialchars($habitat['image']); ?>" alt="<?php echo htmlspecialchars($habitat['name']); ?>" width="100">
             <?php endif; ?>
         </div>
-        <button type="submit" class="btn btn-primary">Mettre à jour</button>
+        <button type="submit" class="btn btn-success">Mettre à jour</button>
     </form>
 </div>
 
