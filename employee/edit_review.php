@@ -1,8 +1,26 @@
 <?php
-require '../functions.php';
-$conn = dbConnect();
 
-// Vérifier si l'ID de l'avis est fourni
+// Vérification de l'identification de l'utiliateur, il doit être role 2 donc employé, sinon page login.php
+
+session_start();
+if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 2) {
+    header('Location: ../login.php');
+    exit;
+}
+
+require '../functions.php';
+
+// Connexion à la base données
+
+$db = new Database();
+$conn = $db->connect();
+
+// Instance de la classe Review pour toutes les méthodes en rapport avec les avis
+
+$reviewManager = new Review($conn);
+
+// Vérification si l'ID de l'avis est fourni
+
 if (!isset($_GET['id'])) {
     echo "Aucun avis spécifié.";
     exit;
@@ -11,32 +29,34 @@ if (!isset($_GET['id'])) {
 $reviewId = $_GET['id'];
 
 // Récupérer les données de l'avis
-$stmt = $conn->prepare("SELECT * FROM reviews WHERE id = ?");
-$stmt->execute([$reviewId]);
-$review = $stmt->fetch(PDO::FETCH_ASSOC);
+$review = $reviewManager->getAvisById($reviewId);
 
 if (!$review) {
     echo "Avis non trouvé.";
     exit;
 }
 
-// Traitement du formulaire de modification
+// Traitement du formulaire de modification (POST)
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pseudo = $_POST['pseudo'] ?? $review['visitor_name'];
     $subject = $_POST['subject'] ?? $review['subject'];
     $review_text = $_POST['review_text'] ?? $review['review_text'];
 
-    $updateStmt = $conn->prepare("UPDATE reviews SET visitor_name = ?, subject = ?, review_text = ? WHERE id = ?");
-    $updateStmt->execute([$pseudo, $subject, $review_text, $reviewId]);
+    // Utilisation de la méthode "updateAvis" pour modifier les informations existantes
 
-    header('Location: manage_reviews.php'); // Rediriger vers la page de gestion des avis
+    $reviewManager->updateAvis($reviewId, $pseudo, $subject, $review_text);
+
+    // Rediriger vers la page de gestion des avis
+
+    header('Location: manage_reviews.php');
     exit;
 }
 
 include '../templates/header.php';
 include 'navbar_employee.php';
 ?>
-
+<!-- Conteneur pour afficher le formulaire POST pour modifier l'avis sélectionné -->
 <div class="container">
     <h1>Modifier l'avis</h1>
     <form action="edit_review.php?id=<?php echo htmlspecialchars($reviewId); ?>" method="POST">
@@ -56,5 +76,4 @@ include 'navbar_employee.php';
     </form>
 </div>
 
-<?php include '../templates/footer.php';
-
+<?php include '../templates/footer.php'; ?>
