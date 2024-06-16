@@ -47,20 +47,13 @@ include 'navbar_admin.php';
             </tr>
         </thead>
         <tbody>
+            
             <!-- Boucle "foreach" qui affiche tous les services existants -->
 
             <?php foreach ($services as $service): ?>
                 <tr>
-                    <!-- Affiche le nom du service -->
-
                     <td><?php echo htmlspecialchars($service['name']); ?></td>
-
-                    <!-- Affiche la description du service -->
-
                     <td><?php echo htmlspecialchars($service['description']); ?></td>
-
-                    <!-- Affiche l'image du service -->
-
                     <td>
                         <?php if (!empty($service['image'])): ?>
                             <img src="../uploads/<?php echo htmlspecialchars($service['image']); ?>" alt="Image du Service" style="width: 100px;">
