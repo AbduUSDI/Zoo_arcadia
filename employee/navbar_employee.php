@@ -1,3 +1,5 @@
+<!-- Utilisation d'une navbar classique Boostrap 5 -->
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light" style="background: linear-gradient(to right, #ffffff, #ccedb6);">
     <a class="navbar-brand" href="../index.php">Zoo Arcadia</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -13,6 +15,12 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="manage_food.php">Gérer Nourriture</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="view_animals.php">Animaux</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="view_habitats.php">Habitats</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="logout.php">Déconnexion</a>
