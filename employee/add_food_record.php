@@ -44,6 +44,8 @@ include '../templates/header.php';
 include 'navbar_employee.php';
 ?>
 
+<!-- Conteneur pour afficher le formulaire (POST) pour donner de la nourriture à un animal -->
+
 <div class="container">
     <h1 class="my-4">Donner de la Nourriture</h1>
     <?php if (isset($error)): ?>
@@ -70,7 +72,7 @@ include 'navbar_employee.php';
             <label for="date_given">Date Donnée</label>
             <input type="date" class="form-control" id="date_given" name="date_given" required>
         </div>
-        <button type="submit" class="btn btn-primary">Ajouter</button>
+        <button type="submit" class="btn btn-success">Ajouter</button>
     </form>
 </div>
 
