@@ -14,6 +14,9 @@
                 <a class="nav-link" href="manage_reviews.php">Gérer Avis</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="manage_services.php">Gérer Services</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="manage_food.php">Gérer Nourriture</a>
             </li>
             <li class="nav-item">
