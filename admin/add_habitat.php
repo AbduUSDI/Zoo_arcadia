@@ -1,4 +1,7 @@
 <?php
+
+// Vérification de l'identification de l'utiliateur, il doit être role 1 donc admin, sinon page login.php
+
 session_start();
 if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
     header('Location: ../login.php');
@@ -6,12 +9,23 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
 }
 
 require '../functions.php';
-$conn = dbConnect();
+
+// Connexion à la base de données
+
+$db = (new Database())->connect();
+
+// Instance Habitat pour utiliser les méthodes en rapport avec les habitats
+
+$habitat = new Habitat($db);
+
+// Traitement et récupération des données du formulaire (POST) d'ajout d'habitat
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $description = $_POST['description'];
     $image = $_FILES['image'];
+
+    // Ajout d'une image pour l'habitat
 
     if ($image['error'] == UPLOAD_ERR_OK) {
         $imageName = time() . '_' . $image['name'];
@@ -20,19 +34,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $imageName = null;
     }
 
-    $stmt = $conn->prepare("INSERT INTO habitats (name, description, image) VALUES (?, ?, ?)");
-    $stmt->execute([$name, $description, $imageName]);
+    // Utilisation de la méthode préparée "addHabitat" pour finaliser le formulaire et valider les informations
 
-    header('Location: manage_habitats.php');
-    exit;
+    if ($habitat->addHabitat($name, $description, $imageName)) {
+        header('Location: manage_habitats.php');
+        exit;
+    } else {
+        $error = "Erreur lors de l'ajout de l'habitat.";
+    }
 }
 
 include '../templates/header.php';
 include 'navbar_admin.php';
 ?>
 
+<!-- Conteneur pour afficher le formulaire d'ajout d'unn habitat -->
+
 <div class="container">
     <h1 class="my-4">Ajouter un Habitat</h1>
+    <?php if (isset($error)): ?>
+        <div class="alert alert-danger"><?php echo $error; ?></div>
+    <?php endif; ?>
     <form method="POST" enctype="multipart/form-data">
         <div class="form-group">
             <label for="name">Nom</label>
@@ -46,7 +68,7 @@ include 'navbar_admin.php';
             <label for="image">Image</label>
             <input type="file" class="form-control-file" id="image" name="image">
         </div>
-        <button type="submit" class="btn btn-primary">Ajouter</button>
+        <button type="submit" class="btn btn-success">Ajouter</button>
     </form>
 </div>
 
