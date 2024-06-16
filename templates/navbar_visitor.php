@@ -1,3 +1,5 @@
+<!-- Utilisation d'une navbar classique Bootstrap 5 en y ajoutant le bouton de connexion, il sera en "déconnexion" si l'utilisateur est déjà connecté. -->
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top" style="background: linear-gradient(to right, #ffffff, #ccedb6);">
     <a class="navbar-brand" href="index.php">Zoo Arcadia</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,6 +25,9 @@
             <li class="nav-item">
                 <a class="nav-link" href="animals.php">Animaux</a>
             </li>
+
+            <!-- Ici pour le bouton de déconnexion : utilisation d'un " if/else"-->
+
             <?php if (isset($_SESSION['user'])): ?>
                 <li class="nav-item">
                     <a class="nav-link" href="admin/logout.php">Déconnexion</a>
@@ -33,6 +38,8 @@
                 </li>
             <?php endif; ?>
 
+            <!-- Ici utilisation de if pour afficher un bouton seulement si l'utilisateur ayant le role en question est connecté, sinon rien ne s'affichera -->
+            
             <?php if (isset($_SESSION['user']) && $_SESSION['user']['role_id'] == 1): ?>
                 <li class="nav-item">
                     <a class="nav-link" href="admin/index.php">Mon espace administrateur</a>

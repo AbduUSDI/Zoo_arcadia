@@ -1,14 +1,26 @@
 <?php
-session_start();
-require '../functions.php';
-$conn = dbConnect();
 
+// Vérification de l'identification de l'utiliateur, il doit être role 1 donc admin, sinon page login.php
+
+session_start();
 if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
-    header('Location: ../index.php');
+    header('Location: ../login.php');
     exit;
 }
 
-$animalId = $_GET['id'];
+// Connexion à la base de données
+
+$db = new Database();
+$conn = $db->connect();
+
+// Instance de la classe Animal pour utiliser les méthodes en rapport avec les animaux
+$animalManager = new Animal($conn);
+
+// Vérification si l'id est affiché sur l'URL
+
+$animal_id = $_GET['id'];
+
+// Récupération des données du formulaire POST
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
@@ -16,33 +28,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $habitat_id = $_POST['habitat_id'];
     $image = $_FILES['image'];
 
+// Si une image est chargée alors l'image va dans le dossier /uploads en utilisant les méthodes "updateAvecImage" et "updateSansImage"
+
     if ($image['name']) {
-        $targetDir = "../uploads/";
-        $targetFile = $targetDir . basename($image["name"]);
+        $dossier = "../uploads/";
+        $imageName = time() . '_' . basename($image["name"]);
+        $targetFile = $dossier . $imageName;
         move_uploaded_file($image["tmp_name"], $targetFile);
 
-        $stmt = $conn->prepare("UPDATE animals SET name = ?, species = ?, habitat_id = ?, image = ? WHERE id = ?");
-        $stmt->execute([$name, $species, $habitat_id, $targetFile, $animalId]);
+        // Méthode updateAvecImage de la classe Animal
+        $animalManager->updateAvecImage([$name, $species, $habitat_id, $targetFile, $animal_id]);
     } else {
-        $stmt = $conn->prepare("UPDATE animals SET name = ?, species = ?, habitat_id = ? WHERE id = ?");
-        $stmt->execute([$name, $species, $habitat_id, $animalId]);
+        // Méthode updateSansImage de la classe Animal
+        $animalManager->updateSansImage([$name, $species, $habitat_id, $animal_id]);
     }
 
     header('Location: manage_animals.php');
     exit;
 }
 
-$stmt = $conn->prepare("SELECT * FROM animals WHERE id = ?");
-$stmt->execute([$animalId]);
-$animal = $stmt->fetch();
+// Utilisez la méthode getDetailsAnimal de la classe Animal pour récupérer les détails de l'animal spécifique grâce à son id
+$animal = $animalManager->getDetailsAnimal($animal_id);
 
-$stmt = $conn->prepare("SELECT * FROM habitats");
-$stmt->execute();
-$habitats = $stmt->fetchAll();
+// Définition de l'ID de l'habitat à l'animal actuel
+$habitat_id = $animal['habitat_id'];
+
+// Utilisation de la méthode getParHabitats de la classe Animal pour récupérer la liste des habitats dans le label Select
+
+$habitats= $animalManager->getParHabitat($habitat_id);
 
 include '../templates/header.php';
 include 'navbar_admin.php';
 ?>
+
+<!-- Conteneur pour afficher le formulaire (POST) -->
 
 <div class="container">
     <h1 class="my-4">Modifier un Animal</h1>
@@ -69,8 +88,10 @@ include 'navbar_admin.php';
             <label for="image">Image (laisser vide pour ne pas changer)</label>
             <input type="file" class="form-control" id="image" name="image">
         </div>
-        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+        <button type="submit" class="btn btn-success">Enregistrer les modifications</button>
     </form>
+</div>
+
 </div>
 
 <?php include '../templates/footer.php'; ?>

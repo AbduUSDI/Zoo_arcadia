@@ -1,4 +1,7 @@
 <?php
+
+// Vérification de l'identification de l'utiliateur, il doit être role 1 donc admin, sinon page login.php
+
 session_start();
 if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
     header('Location: ../login.php');
@@ -6,32 +9,30 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
 }
 
 require '../functions.php';
-$conn = dbConnect();
 
-// Gestion des filtres
+// Connexion à la base de données
+
+$db = new Database();
+$conn = $db->connect();
+
+// Instance Animal pour utiliser les méthodes préparées en rapport avec les animaux
+
+$animal = new Animal($conn);
+
+// Création de deux définitions pour les filtres
+
 $selectedDate = $_GET['visit_date'] ?? null;
 $selectedAnimalId = $_GET['animal_id'] ?? null;
 
-$query = "SELECT ar.*, a.name as animal_name FROM vet_reports ar JOIN animals a ON ar.animal_id = a.id";
-$conditions = [];
+// Utilisation de la méthode préparée "filtreDateAnimal" pour faire fonctionner la fonction afin de filtrer les rapports en fonction de la sélection
 
-if (!empty($selectedDate)) {
-    $conditions[] = "ar.visit_date = '$selectedDate'";
-}
-if (!empty($selectedAnimalId)) {
-    $conditions[] = "ar.animal_id = $selectedAnimalId";
-}
-
-if (!empty($conditions)) {
-    $query .= " WHERE " . implode(' AND ', $conditions);
-}
-
-$query .= " ORDER BY ar.visit_date DESC";
-$reports = $conn->query($query)->fetchAll(PDO::FETCH_ASSOC);
+$reports = $animal->filtresDateAnimal($selectedDate, $selectedAnimalId);
 
 include '../templates/header.php';
 include 'navbar_admin.php';
 ?>
+
+<!-- Conteneur pour filtrer les rapports vétérinaires -->
 
 <div class="container">
     <h1 class="my-4">Gérer les Rapports Vétérinaires</h1>
@@ -64,9 +65,12 @@ include 'navbar_admin.php';
                 </select>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Filtrer</button>
+        <button type="submit" class="btn btn-success">Filtrer</button>
     </form>
     <br>
+
+<!-- Tableau pour afficher les rapports vétérinaires -->
+
     <div class="table-responsive">
         <table class="table table-bordered table-striped table-hover">
             <thead class="thead-dark">

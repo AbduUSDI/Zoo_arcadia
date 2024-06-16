@@ -1,4 +1,7 @@
 <?php
+
+// Vérification de l'identification de l'utiliateur, il doit être role 1 donc admin, sinon page login.php
+
 session_start();
 if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
     header('Location: ../login.php');
@@ -6,48 +9,45 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
 }
 
 require '../functions.php';
-$conn = dbConnect();
+
+// Connexion à la base de données
+
+$db = (new Database())->connect();
+
+// Instance Service pour utiliser la méthode préparée en rapport avec les services 
+
+$service = new Service($db);
+
+// Traitement et récupération des données du formulaire (POST) d'ajout de service
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $description = $_POST['description'];
 
-    // Handle image upload
-    $image = '';
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $fileTmpPath = $_FILES['image']['tmp_name'];
-        $fileName = $_FILES['image']['name'];
-        $fileSize = $_FILES['image']['size'];
-        $fileType = $_FILES['image']['type'];
-        $fileNameCmps = explode(".", $fileName);
-        $fileExtension = strtolower(end($fileNameCmps));
+    try {
+        $image = '';
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
 
-        $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg');
-        if (in_array($fileExtension, $allowedfileExtensions)) {
-            $uploadFileDir = '../uploads/';
-            $dest_path = $uploadFileDir . $fileName;
+            // Utilisation de la méthode préparée "ajouterImage" afin de pouvoir ajouter l'image du service
 
-            if (move_uploaded_file($fileTmpPath, $dest_path)) {
-                $image = $fileName;
-            } else {
-                $error = 'There was some error moving the file to upload directory. Please make sure the upload directory is writable by web server.';
-            }
-        } else {
-            $error = 'Upload failed. Allowed file types: ' . implode(',', $allowedfileExtensions);
+            $image = $service->ajouterImage($_FILES['image']);
         }
-    }
 
-    if (!isset($error)) {
-        $stmt = $conn->prepare("INSERT INTO services (name, description, image) VALUES (?, ?, ?)");
-        $stmt->execute([$name, $description, $image]);
+        // Utilisation de la méthode préparée "ajouterService" pour finaliser le formulaire et envoyer tout sur la BDD afin d'ajouter le service
+
+        $service->ajouterService($name, $description, $image);
         header('Location: manage_services.php');
         exit;
+    } catch (Exception $e) {
+        $error = $e->getMessage();
     }
 }
 
 include '../templates/header.php';
 include 'navbar_admin.php';
 ?>
+
+<!-- Conteneur pour afficher le formulaire (POST) pour ajouter un service -->
 
 <div class="container">
     <h1 class="my-4">Ajouter un Service</h1>
@@ -67,7 +67,7 @@ include 'navbar_admin.php';
             <label for="image">Image du Service</label>
             <input type="file" class="form-control-file" id="image" name="image">
         </div>
-        <button type="submit" class="btn btn-primary">Ajouter</button>
+        <button type="submit" class="btn btn-success">Ajouter</button>
     </form>
 </div>
 

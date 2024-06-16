@@ -1,4 +1,7 @@
 <?php
+
+// Vérification de l'identification de l'utiliateur, il doit être role 1 donc admin, sinon page login.php
+
 session_start();
 if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
     header('Location: ../login.php');
@@ -6,15 +9,31 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
 }
 
 require '../functions.php';
-$conn = dbConnect();
 
-$services = getAll('services');
+
+// Connexion à la base de données
+
+$db = new Database();
+$conn = $db->connect();
+
+// Création d'une instance de la classe Service pour toutes les méthodes concernant les services
+
+$services = new Service($conn);
+
+// Affichage de tous les services sur le tableau en utilisant la méthode "getServices"
+
+$services = $services->getServices();
 
 include '../templates/header.php';
 include 'navbar_admin.php';
 ?>
 
+<!-- Conteneur pour afficher la table des services existants -->
+
 <div class="container">
+
+    <!-- Table pour afficher les services existants -->
+
     <div class="table-responsive">
     <h1 class="my-4">Gérer les services</h1>
     <a href="add_service.php" class="btn btn-success mb-4">Ajouter un service</a>
@@ -28,6 +47,9 @@ include 'navbar_admin.php';
             </tr>
         </thead>
         <tbody>
+            
+            <!-- Boucle "foreach" qui affiche tous les services existants -->
+
             <?php foreach ($services as $service): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($service['name']); ?></td>
@@ -38,12 +60,18 @@ include 'navbar_admin.php';
                         <?php endif; ?>
                     </td>
                     <td>
+
+                        <!-- Bouton pour modifier le service -->
+
                         <a href="edit_service.php?id=<?php echo $service['id']; ?>" class="btn btn-warning">Modifier</a>
-                        <a href="delete_service.php?id=<?php echo $service['id']; ?>" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce service ?');">Supprimer</a>
+                        
+                        <!-- Bouton pour supprimer le service -->
+                        
+                        <a href="delete_service.php?id=<?php echo $service['id']; ?>" class="btn btn-danger" onclick="return confirm('Êtes-vous sr de vouloir supprimer ce service ?');">Supprimer</a>
                     </td>
                 </tr>
-            <?php endforeach; ?>
-        </tbody>
+                <?php endforeach; ?>
+            </tbody>
     </table>
     </div>
 </div>

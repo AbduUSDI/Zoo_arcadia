@@ -42,6 +42,7 @@ class Animal {
     private $db;
     // Création d'une définition pour la méthode ajouterNourriture
     private $nourriture = 'food';
+    private $table = 'vet_reports';
     // Constructeur qui initialise la connexion à la BDD
     public function __construct($db) {
         $this->db = $db;
@@ -136,6 +137,17 @@ class Animal {
         $stmt->bindParam(':details', $details, PDO::PARAM_STR);
         $stmt->execute();
     }
+    // Méthode préparée pour supprimer un rapport vétérinaire
+    public function deleteRapport($id) {
+        $query = "DELETE FROM " . $this->table . " WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        
+        if($stmt->execute()) {
+            return true;
+        }
+        return false;
+    }
     // Méthode préparée pour sélectionner un animal par son habitat et son id
     public function getParHabitat($habitat_id) {
         $stmt = $this->db->prepare("SELECT animals.*, habitats.name AS habitat_name, animals.image FROM animals LEFT JOIN habitats ON animals.habitat_id = habitats.id WHERE animals.habitat_id = ?");
@@ -218,7 +230,7 @@ class Review {
         $stmt->execute();
     }
     // Méthode préparée pour supprimer le commentaire ou l'avis
-    public function delete($id) {
+    public function deleteAvis($id) {
         $stmt = $this->db->prepare("DELETE FROM reviews WHERE id = :id");
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
@@ -234,6 +246,18 @@ class Review {
         $stmt = $this->db->prepare("SELECT * FROM reviews ORDER BY created_at DESC");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    // Méthode préparée pour récupérer un avis ou un commentaire approuvé
+    public function getAvisById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM reviews WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Méthode préparée pour modifier un avis ou un commentaire existant déjà approuvés
+    public function updateAvis($id, $visitorName, $subject, $reviewText) {
+        $stmt = $this->db->prepare("UPDATE reviews SET visitor_name = ?, subject = ?, review_text = ? WHERE id = ?");
+        $stmt->execute([$visitorName, $subject, $reviewText, $id]);
     }
 }
 /**
@@ -314,7 +338,7 @@ class Service {
     }
 }
 /**
- * Classe regroupement toutes les méthodes et définitions en rapport avec les habitats du zoo
+ * Classe regroupant toutes les méthodes et définitions en rapport avec les habitats du zoo
  */
 class Habitat {
     // Définition de la base de données et du constructeur

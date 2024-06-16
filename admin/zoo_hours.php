@@ -1,4 +1,7 @@
 <?php
+
+// Vérification de l'identification de l'utiliateur, il doit être role 1 donc admin, sinon page login.php
+
 session_start();
 if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
     header('Location: ../login.php');
@@ -6,17 +9,27 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 1) {
 }
 
 require '../functions.php';
-$conn = dbConnect();
 
-// Récupération des horaires existants
-$query = $conn->query("SELECT * FROM zoo_hours ORDER BY id ASC");
-$hours = $query->fetchAll(PDO::FETCH_ASSOC);
+// Connexion à la base de données
+ 
+$db = new Database();
+$conn = $db->connect();
 
-// Traitement du formulaire
+// Instance ZooHours pour utiliser les méthode préparée pour les horaires du zoo
+
+$zooHours = new ZooHours($conn);
+
+// Récupération des horaires existants grâce à la méthode "getAllHours"
+
+$hours = $zooHours->getAllHours();
+
+// Traitement du formulaire POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($_POST['hours'] as $id => $times) {
-        $stmt = $conn->prepare("UPDATE zoo_hours SET open_time = ?, close_time = ? WHERE id = ?");
-        $stmt->execute([$times['open'], $times['close'], $id]);
+
+        // Utilisation de la méthode préparée "updateHours" pour pouvoir modifier les horaires du zoo en cliquant sur les horaires un par un
+         
+        $zooHours->updateHours($times['open'], $times['close'], $id);
     }
     header("Location: zoo_hours.php");
     exit;
@@ -26,12 +39,14 @@ include '../templates/header.php';
 include 'navbar_admin.php';
 ?>
 
+<!-- Conteneur pour afficher le formulaire tableau (POST) affichant les horaires du zoo modifiable -->
+
 <div class="container">
     <h2>Modifier les horaires d'ouverture du Zoo</h2>
     <form method="POST">
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead>
+    <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="thead-dark">
                     <tr>
                         <th>Jour</th>
                         <th>Heures d'ouverture</th>
@@ -54,5 +69,6 @@ include 'navbar_admin.php';
         <button type="submit" class="btn btn-primary">Mettre à jour les horaires</button>
     </form>
 </div>
+</div>
 
-<?php include '../templates/footer.php';
+<?php include '../templates/footer.php'; ?>
