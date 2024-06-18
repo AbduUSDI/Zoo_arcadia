@@ -39,7 +39,7 @@ Zoo Arcadia permet aux visiteurs de découvrir les animaux et leurs habitats, et
 7. Importez la base de données MySQL en utilisant le fichier zoo_arcadia.sql qui contient tout le SQL pour créer la BDD complète contenant ses tables et ses valeurs.
 8. Vérifiez que la base de donnée contient bien les tables du projet.
 9. Télécharger le code source du projet en .zip et décompresser le tout dans un dossier nommé "zoo_arcadia" qui devra être dans votre répertoire "htdocs" qui se trouve dans le dossier "xampp" (tout dépend de où vous l'avez positionner pendant votre installation, si par défaut : le dossier se trouve dans "utilisateur" dans le Disque local).
-10. Ouvrez un invité de commandes : aller à la racine du projet et installer les dépendances comme :  Créer le fichier composer.json en faisant : 'composer init'  puis ensuite télécharger les dépendances :     'composer install mongodb/mongodb' ; 'composer require phpmailer/phpmailer'
+10. Ouvrez un invité de commandes : aller à la racine du projet et installer les dépendances comme :  Créer le fichier composer.json en faisant : `composer init`  puis ensuite télécharger les dépendances :     `composer install mongodb/mongodb` ; `composer require phpmailer/phpmailer`
 11. Vous pouvez maintenant lancez l'application via votre serveur local en utilisant l'url : http://localhost/zoo_arcadia/index.php sur votre navigateur par défaut.
 
 ## Utilisation
