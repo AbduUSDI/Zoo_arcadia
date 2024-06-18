@@ -82,6 +82,9 @@ body {
                     <img class="card-img-top" src="uploads/<?php echo htmlspecialchars($animal['image']); ?>" alt="<?php echo htmlspecialchars($animal['name']); ?>">
                     <div class="card-body">
                         <h5 class="card-title"><?php echo htmlspecialchars($animal['name']); ?></h5>
+
+                        <!-- Utilisation d'un "onclick" ici pour pouvoir utiliser AJAX afin de récupérer le clic et le faire fonctionner avec record_click.php -->
+
                         <button onclick="registerClick(<?php echo $animal['id']; ?>)" class="btn btn-success">Voir les détails</button>
                     </div>
                 </div>
@@ -92,10 +95,14 @@ body {
 
 <script>
 function registerClick(animalId) {
+
+    // Utilisation du fichier record_click.php pour récupérer les click et l'envoyer dans la base de données MongoDB
+
     fetch('record_click.php?animal_id=' + animalId)
         .then(response => response.text())
         .then(data => {
             console.log(data);
+
             // Redirection vers la page des détails de l'animal
             window.location.href = 'animal.php?id=' + animalId;
         });
