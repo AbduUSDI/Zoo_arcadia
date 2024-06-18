@@ -12,7 +12,8 @@ Zoo Arcadia permet aux visiteurs de découvrir les animaux et leurs habitats, et
 - **PHP** : Scripting côté serveur.
 - **MySQL** : Base de données.
 - **Bootstrap** : Design responsive.
-- **jQuery** : Scripting côté client.
+- **Axios** : Scripting côté client.
+- **AJAX** : Scripting coté client.
 
 ## Environnement de Développement
 
@@ -20,6 +21,7 @@ Zoo Arcadia permet aux visiteurs de découvrir les animaux et leurs habitats, et
 - **Visual Studio Code, Cursor** : Éditeurs de code.
 - **Composer** : Gestionnaire de dépendances PHP.
 - **Git** : Contrôle de version.
+- **MongoDBCompass** : Base de données non relationnelle 
 
 ## Structure du Projet
 
@@ -42,6 +44,7 @@ Zoo Arcadia permet aux visiteurs de découvrir les animaux et leurs habitats, et
 ## Utilisation
 
 Naviguez dans l'application en utilisant les différents rôles pour explorer les fonctionnalités spécifiques à chaque utilisateur.
+Un fichier Manuel d'utilisation.pdf est dans le dépôt Github, il explique toutes les fonctionnalités et comment y accéder.
 
 ## Contact
 
