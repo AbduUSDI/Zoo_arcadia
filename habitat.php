@@ -1,24 +1,36 @@
 <?php
+session_start();
 require 'functions.php';
+require 'MongoDB.php';
 
+// Connexion à la base données
 $db = (new Database())->connect();
+$mongoClient = new MongoDB("mongodb://localhost:27017", "zoo_arcadia_click_counts");
 
 if ($db) {
     $habitatId = $_GET['id'];
+
+    // Instance Habitat pour utiliser les méthodes préparées en rapport avec les habitat
     $habitatModel = new Habitat($db);
+
+    // Récupération des habitat par id grâce à la méthode "getParId"
     $habitat = $habitatModel->getParId($habitatId);
+
+    // Récupération des animaux par id d'habitat grâce à la méthode "getAnimauxParHabitat"
     $animals = $habitatModel->getAnimauxParHabitat($habitatId);
+
+    // Récupération de commentaires habitat approuvés grâce à la méthode "getCommentsApprouvés"
     $vetComments = $habitatModel->getCommentsApprouvés($habitatId);
 } else {
     // Gestion des erreurs de connexion
-    die('Database connection failed.');
+    die('Connexion à la base donnée échouée.');
 }
 
 include 'templates/header.php';
 include 'templates/navbar_visitor.php';
 ?>
 
-<style> 
+<style>
 h1, h2 {
     text-align: center;
 }
@@ -32,6 +44,7 @@ body {
     <h1 class="my-4"><?php echo htmlspecialchars($habitat['name']); ?></h1>
     <img src="uploads/<?php echo htmlspecialchars($habitat['image']); ?>" class="img-fluid mb-4" alt="<?php echo htmlspecialchars($habitat['name']); ?>">
     <p><?php echo htmlspecialchars($habitat['description']); ?></p>
+
     <!-- Section pour afficher les commentaires approuvés -->
     <h2>Commentaires sur l'habitat</h2>
     <div class="table-responsive">
@@ -59,6 +72,7 @@ body {
             </tbody>
         </table>
     </div>
+
     <!-- Section pour afficher les animaux -->
     <h2>Animaux</h2>
     <div class="row">
@@ -68,12 +82,31 @@ body {
                     <img class="card-img-top" src="uploads/<?php echo htmlspecialchars($animal['image']); ?>" alt="<?php echo htmlspecialchars($animal['name']); ?>">
                     <div class="card-body">
                         <h5 class="card-title"><?php echo htmlspecialchars($animal['name']); ?></h5>
-                        <a href="animal.php?id=<?php echo $animal['id']; ?>" class="btn btn-primary">Voir les détails</a>
+
+                        <!-- Utilisation d'un "onclick" ici pour pouvoir utiliser AJAX afin de récupérer le clic et le faire fonctionner avec record_click.php -->
+
+                        <button onclick="registerClick(<?php echo $animal['id']; ?>)" class="btn btn-success">Voir les détails</button>
                     </div>
                 </div>
             </div>
         <?php endforeach; ?>
     </div>
 </div>
+
+<script>
+function registerClick(animalId) {
+
+    // Utilisation du fichier record_click.php pour récupérer les click et l'envoyer dans la base de données MongoDB
+
+    fetch('record_click.php?animal_id=' + animalId)
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+
+            // Redirection vers la page des détails de l'animal
+            window.location.href = 'animal.php?id=' + animalId;
+        });
+}
+</script>
 
 <?php include 'templates/footer.php'; ?>
