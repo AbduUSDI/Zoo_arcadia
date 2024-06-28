@@ -103,7 +103,7 @@ body {
         </table>
     </div>
 
-    <!-- Section for displaying animals -->
+    <!-- Section pour afficher les animals -->
     <h2>Animaux</h2>
     <div class="row">
         <?php foreach ($animals as $animal): ?>
@@ -113,7 +113,8 @@ body {
                     <div class="card-body">
                         <h5 class="card-title"><?php echo htmlspecialchars($animal['name']); ?></h5>
 
-                        <!-- Onclick event to register click using AJAX -->
+                        <!-- Utilisation d'un "onclick" event AJAX pour utiliser le fichier record_click.php et valider le formulaire d'ajoute de clic à l'animal -->
+                        
                         <button onclick="registerClick(<?php echo $animal['id']; ?>)" class="btn btn-success">Voir les détails</button>
                     </div>
                 </div>
